@@ -1,15 +1,32 @@
-import 'dotenv/config';
-import express from 'express';
-import routes from './routes/routes.js';
-import { initializeDatabase } from './configs/Database.js';
-
+import 'dotenv/config'
+import routes from "./routes/routes.js";
+import express from "express";
+import cors from 'cors';
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 
+app.use(
+    "uploads/images",
+    express.static("uploads/images")
+)
+
+
+app.use(cors())
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/', routes);
+// Caminho completo do arquivo atual
+const __filename = fileURLToPath(import.meta.url);
+// Pasta do arquivo atual
+const __dirname = path.dirname(__filename);
 
+// aponta pra uploads (raiz) e mantém /uploads na URL
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use('/' ,routes);
+
+const PORT = process.env.SERVER_PORT || 3000;
 
 initializeDatabase().then(() => {
     app.listen(process.env.SERVER_PORT, () => {
