@@ -1,38 +1,39 @@
 import 'dotenv/config';
-import express from 'express';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-import routes from './routes/routes.js';
-import { initializeDatabase } from './configs/Database.js';
+import routes from "./routes/routes.js";
+import express from "express";
+import cors from 'cors';
+import path from "path";
+import { fileURLToPath } from "url";
 
 const app = express();
 
-// Corrige caminhos para ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+app.use(cors());
 
-// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Torna a pasta uploads pública
+// Caminho completo do arquivo atual
+const __filename = fileURLToPath(import.meta.url);
+
+// Pasta do arquivo atual
+const __dirname = path.dirname(__filename);
+
+// Arquivos estáticos
 app.use(
-    '/uploads',
-    express.static(path.join(__dirname, '../uploads'))
+  "/uploads",
+  express.static(path.resolve("uploads"))
 );
 
 // Rotas
-app.use('/', routes);
+app.use("/", routes);
 
-// Inicializa banco e servidor
-initializeDatabase()
-    .then(() => {
-        app.listen(process.env.SERVER_PORT, () => {
-            console.log(`Servidor rodando na porta ${process.env.SERVER_PORT}`);
-            console.log(`Uploads: ${path.join(__dirname, '../uploads')}`);
-        });
-    })
-    .catch((err) => {
-        console.error('Erro ao inicializar o banco:', err);
-    });
+// Porta para deploy ou ambiente local
+const PORT = process.env.PORT || process.env.SERVER_PORT || 8080;
+
+// Inicialização do servidor
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+});
+
+console.log(`DB_HOST: ${process.env.DB_HOST}`);
