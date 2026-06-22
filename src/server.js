@@ -1,21 +1,22 @@
 import 'dotenv/config';
 import express from 'express';
+import path from 'path';
 import routes from './routes/routes.js';
 import { initializeDatabase } from './configs/Database.js';
 
 const app = express();
 
-// Middleware para receber JSON e formulários
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Disponibiliza a pasta uploads publicamente
-app.use('/uploads', express.static('uploads'));
+// Servir arquivos da pasta uploads
+app.use(
+    '/uploads',
+    express.static(path.resolve('uploads'))
+);
 
-// Rotas da aplicação
 app.use('/', routes);
 
-// Inicializa o banco e inicia o servidor
 initializeDatabase()
     .then(() => {
         app.listen(process.env.SERVER_PORT, () => {
